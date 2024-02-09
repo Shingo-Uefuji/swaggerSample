@@ -1,0 +1,140 @@
+# OpenAPIの最新のバージョンを記述します
+openapi: 3.0.3 
+
+
+info: # infoはこの書類に関する情報を記述します。
+  title: この書類のタイトルを記述します
+  version: バージョンを記述します
+  description: | # このように | を入れておくと複数行に渡る記述ができます。
+    この書類の説明を記述します
+
+    ## 書類全体として共通の項目を記述します
+
+    ## (例)リクエスト
+    - (例)文字コード：UTF-8
+
+# serversはAPIの基本URLを記述する部分です。複数記述が可能です。
+servers:
+  - url: http://sample1/ 
+    description: urlの説明を記述します
+
+  - url: http://sample2/
+    description: sample2
+
+# pathsはAPIのエンドポイントやHTTPメソッド、操作を記述する部分です。
+paths:
+  /エンドポイント: # APIのエンドポイントを記述します
+    post:  #HTTPメソッドを記述します
+      tags:
+        - APIのタグ付けをします
+      summary: 操作の要約を記述します。
+      description: 操作の詳細を記述します。
+      parameters: # パラメータを記述します。記述の詳細はcomponents/parametersを参照してください。
+      # refを使うことで、様々な定義をcomponentsにまとめて再利用しやすくなります。
+      - $ref: '#/components/parameters/パラメータ名'
+
+      requestBody: # リクエストのボディを配下に記述します。
+        content:
+          application/json: # リクエストの形式を指定します。
+            schema: # リクエストのスキーマを記述します。
+              $ref: '#/components/schemas/サンプルリクエスト'
+      
+      responses: # レスポンスを記述します
+        200: # HTTPステータスコードを指定します。
+          description: レスポンスの説明を記述します。(例：成功時)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/サンプルレスポンス'
+              examples:
+                正常時（ケース1）: #ケースごとに場合分けして記述することができます。
+                  value:
+                    name: 上藤真吾
+                    gender: 1
+
+                正常時（ケース2）:
+                  value:
+                    name: 上藤真吾
+                    gender: 1
+                    birthday: 1998/10/27
+        500:
+          description: レスポンスの説明を記述します。(例：エラー発生時)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/エラーサンプル'
+
+components: # 配下に再利用可能なオブジェクトを定義します。
+  parameters: # 配下にパラメータを記述します。
+    パラメータ名: # 
+      in: header # パラメータの場所を記述します。(query, header, path, formData, bodyのいずれか)
+      name: パラメータ名を記述します
+      required: true # 必須か否かを指定します
+      description: パラメータの説明を記述します
+      schema:
+        type: string # パラメータの型を記述します
+        example: パラメータの入力例を記述します
+
+  schemas: # 再利用可能なスキーマを定義します
+    サンプルリクエスト:
+      type: object
+      required: # 必須な項目を配下に羅列します。
+        - id
+        - password
+      properties:
+        id:
+          description: | # 説明を記述します。
+            会員のID
+            10文字の数字
+          type: string #プロパティの型を記述します。
+          pattern: ^d{10}$ #制約がある場合はそれを記述します。
+          example: 1000000000 #例をここに記述します。
+        password:
+          description: パスワード
+          type: string
+          example: password
+          maxLength: 20 #最大文字数を記載できます。他にも様々な指定があります。
+
+    サンプルレスポンス: #サンプルリクエストと書き方は同様です。
+      type: object
+      required:
+        - name
+        - gender
+      properties:
+        name:
+          description: 名前
+          type: string
+          example: 上藤真吾
+          maxLength: 10
+        gender:
+          description: |
+            性別
+            1:男
+            2:女
+            9:その他
+          type: integer
+          example: 1
+          pattern: ^[1,2,9]$
+        birthday:
+          description: | 
+            生年月日
+            フォーマットはYYYY/MM/dd
+          type: string
+          pattern: ^\\d{4}/\\d{2}/\\d{2}$
+          example: 1998/10/27
+        
+    エラーサンプル: # 書き方は同様です。
+      type: object
+      required:
+        - errorCode
+        - errorMessage
+      properties:
+        errorCode:
+          type: string
+          description: |
+            エラーコード
+          example: E001_0001
+        errorMessage:
+          type: string
+          description: エラーメッセージ
+          example: 会員が存在しません。
