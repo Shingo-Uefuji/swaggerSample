@@ -45,7 +45,9 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/サンプルレスポンス'
+                oneOf: #oneOfにより複数スキーマの指定が可能となる。
+                  - $ref: '#/components/schemas/サンプルレスポンス'
+                  - $ref: '#/components/schemas/誕生日追加サンプルレスポンス'
               examples:
                 正常時（ケース1）: #ケースごとに場合分けして記述することができます。
                   value:
@@ -62,7 +64,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/エラーサンプル'
+                $ref: '#/components/schemas/エラーサンプルレスポンス'
 
 components: # 配下に再利用可能なオブジェクトを定義します。
   parameters: # 配下にパラメータを記述します。
@@ -87,8 +89,8 @@ components: # 配下に再利用可能なオブジェクトを定義します。
             会員のID
             10文字の数字
           type: string #プロパティの型を記述します。
-          pattern: ^d{10}$ #制約がある場合はそれを記述します。
           example: 1000000000 #例をここに記述します。
+          pattern: ^d{10}$ #制約がある場合はそれを記述します。
         password:
           description: パスワード
           type: string
@@ -115,15 +117,21 @@ components: # 配下に再利用可能なオブジェクトを定義します。
           type: integer
           example: 1
           pattern: ^[1,2,9]$
-        birthday:
-          description: | 
-            生年月日
-            フォーマットはYYYY/MM/dd
-          type: string
-          pattern: ^\\d{4}/\\d{2}/\\d{2}$
-          example: 1998/10/27
+
+    誕生日追加サンプルレスポンス: # allOfを使うことで既存のスキーマを流用できます。
+      allOf:
+        - $ref: '#/components/schemas/サンプルレスポンス'
+        - type: object
+          properties:
+            birthday:
+              description: | 
+                生年月日
+                フォーマットはYYYY/MM/dd
+              type: string
+              example: 1998/10/27
+              pattern: '^\\d{4}/\\d{2}/\\d{2}$'
         
-    エラーサンプル: # 書き方は同様です。
+    エラーサンプルレスポンス: # 書き方は同様です。
       type: object
       required:
         - errorCode
